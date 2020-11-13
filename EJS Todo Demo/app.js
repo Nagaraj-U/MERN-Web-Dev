@@ -3,30 +3,30 @@ var bodyParser = require("body-parser");
 var app = express();
 
 app.set("view engine","ejs");
+app.use(bodyParser.urlencoded({extended:true}));
+
+//getting date
 
 var day = new Date();
-var today = day.getDay();
-var dayInfo = "";
+//ref : https://stackoverflow.com/questions/3552461/how-to-format-a-javascript-date
+var options = {
+    weekday : "long",
+    month : "long",
+    day : "numeric"
+}
+var today = day.toLocaleDateString("en-US",options);  //Friday, November 13
+
+//making todo list
+var items = ["buy food","cook food","eat food"]
 
 app.get("/",function(req,res){
-  
-    if(today === 1){
-        dayInfo = "monday";
-    }else if(today === 2){
-        dayInfo = "tuesday";
-    }else if(today === 3){
-        dayInfo = "wednesday";
-    }else if(today === 4){
-        dayInfo = "thursday";
-    }else if(today === 5){
-        dayInfo = "friday";
-    }else if(today === 6){
-        dayInfo = "saturday";
-    }else{
-        dayInfo = "sunday";
-    }
+    res.render("index.ejs",{today : today, newList : items})
+})
 
-    res.render("index.ejs",{day_info : dayInfo })
+app.post("/",function(req,res){
+    var item = req.body.newItem;  //newItem : is name given in form
+    items.push(item);
+    res.redirect("/");
 })
 
 app.listen(3000,function(){
