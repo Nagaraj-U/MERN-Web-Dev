@@ -6,8 +6,20 @@
     <title>Document</title>
 </head>
 <body>
+    
+<!-- for displaying date -->
+<h1> <%= today %></h1>
 
-    <h2><%= day_info %></h2>
+
+<!-- for displaying all list items -->
+<% for(var i=0;i<newList.length;i++){ %>
+    <li> <%= newList[i] %></li>
+<% } %>
+
+<form action="/" method="post">
+    <input type="text" name="newItem">
+    <button type="submit">add</button>
+</form>
     
 </body>
 </html>
