@@ -7,11 +7,16 @@ const mongoose = require("mongoose")
 const app = express()
 const bodyParser = require("body-parser")
 
-//LEVEL 3 security layer
-//npm install md5
-//hashing : one way almost impossible to decrypt  md5 : message digest
-const md5 = require("md5")
-console.log(md5("nagaraj"));
+//level 4 security   src: https://www.npmjs.com/package/bcrypt
+//SALTING
+// passwrod + random number (salt ) -> hashing -> hashed password       hash and salt is stored in databse
+
+//salt rounds 
+//password+salt - >hashed password + salt -> hashed password      done for k rounds
+
+const bcrypt = require('bcrypt');
+const saltRounds = 10;
+
 
 app.use(express.static("public"))
 app.set("view engine", "ejs")
@@ -40,33 +45,47 @@ app.get("/login",function(req,res){
 
 app.post("/register",function(req,res){
     const username = req.body.username;
-    const password = md5(req.body.password);
-    User.insertMany({
-        email : username,
-        password : password
-    },function(err){
-        if(err){
-            console.log(err);
-        }else{
-            res.render("secrets")
-        }
-    })
+    const password = (req.body.password);
+    bcrypt.hash(password, saltRounds, function(err, hash) { //hash : hashed password coming from callback
+    // Store hash in your password DB.
+        User.insertMany({
+            email : username,
+            password : hash
+        },function(err){
+            if(err){
+                console.log(err);
+            }else{
+                res.render("secrets")
+            }
+        })
+    });
+    
 })
 
 app.post("/login",function(req,res){
     const username = req.body.username;
-    const password = md5(req.body.password);  //hashing password got from user for searching in database (since we stored hashed password otherwise they dont match)
+    const password = (req.body.password);
     User.findOne({
         email : username
     },function(err,foundUser){
         if(err){
             res.send(err)
         }else{
-            if(foundUser.password === password){
-                res.render("secrets")
-            }else{
-                res.send("no such user found")
+            // if(foundUser.password === password){
+            //     res.render("secrets")
+            // }else{
+            //     res.send("no such user found")
+            // }
+            if(foundUser){
+                bcrypt.compare(password, foundUser.password, function(err, result) { //compare password from user and password from founduser from database
+                    if(result){
+                        res.render("secrets")
+                    }else{
+                        res.send("no such user found")
+                    }
+                });
             }
+            
         }
     })
 })
