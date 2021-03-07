@@ -6,7 +6,12 @@ const ejs = require("ejs")
 const mongoose = require("mongoose")
 const app = express()
 const bodyParser = require("body-parser")
-const encrypt = require("mongoose-encryption")
+
+//LEVEL 3 security layer
+//npm install md5
+//hashing : one way almost impossible to decrypt  md5 : message digest
+const md5 = require("md5")
+console.log(md5("nagaraj"));
 
 app.use(express.static("public"))
 app.set("view engine", "ejs")
@@ -19,19 +24,7 @@ const userSchema = new mongoose.Schema(
         password : String
 });
 
-// const secret = " thisismysecret1111111 ";
-
-//drop the database and recreate it tp apply encryption
-
-userSchema.plugin(encrypt,{secret : process.env.SECRET , encryptedFields : ["password"]});
-
 const User = mongoose.model("User",userSchema);
-
-
-
-
-// const newUser = new User({email:"nags@123",password:"nagaraj@123"})
-// newUser.save();
 
 app.get("/",function(req,res){
     res.send("home page")
@@ -47,7 +40,7 @@ app.get("/login",function(req,res){
 
 app.post("/register",function(req,res){
     const username = req.body.username;
-    const password = req.body.password;
+    const password = md5(req.body.password);
     User.insertMany({
         email : username,
         password : password
@@ -62,7 +55,7 @@ app.post("/register",function(req,res){
 
 app.post("/login",function(req,res){
     const username = req.body.username;
-    const password = req.body.password;
+    const password = md5(req.body.password);  //hashing password got from user for searching in database (since we stored hashed password otherwise they dont match)
     User.findOne({
         email : username
     },function(err,foundUser){
