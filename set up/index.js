@@ -7,6 +7,7 @@ app.get("/",function(req,res){
     res.sendFile(__dirname + "/index.html");
 });
 
+
 app.post("/",function(req,res){
     var weight = Number(req.body.num1);
     var height = Number(req.body.num2);
